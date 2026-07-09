@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, Download, LogOut, PhoneCall, Trash2 } from "lucide-react";
+import { CalendarClock, Download, LogOut, MoreHorizontal, PhoneCall, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { AddProspectDialog } from "@/components/add-prospect-dialog";
 import { ConversionBreakdown } from "@/components/conversion-breakdown";
 import { CsvImport } from "@/components/csv-import";
@@ -97,33 +103,40 @@ export default function DashboardPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {prospects.length > 0 && (
-            <>
-              <Button onClick={() => setDailyCallOpen(true)}>
-                <CalendarClock className="size-4" />
-                Appels du jour
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  exportProspectsToCsv(prospects);
-                  toast.success("Export CSV téléchargé.");
-                }}
-              >
-                <Download className="size-4" />
-                Exporter en CSV
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setConfirmClear(true)}
-                className="text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Tout effacer
-              </Button>
-            </>
+            <Button onClick={() => setDailyCallOpen(true)}>
+              <CalendarClock className="size-4" />
+              Appels du jour
+            </Button>
           )}
           <AddProspectDialog prospects={prospects} onAdd={(p) => addProspects([p])} />
           <CsvImport existingProspects={prospects} onImport={addProspects} />
+          {prospects.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" title="Plus d'actions">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    exportProspectsToCsv(prospects);
+                    toast.success("Export CSV téléchargé.");
+                  }}
+                >
+                  <Download className="size-4" />
+                  Exporter en CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setConfirmClear(true)}
+                >
+                  <Trash2 className="size-4" />
+                  Tout effacer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <Button variant="ghost" size="icon" onClick={handleLogout} title="Se déconnecter">
             <LogOut className="size-4" />
           </Button>
