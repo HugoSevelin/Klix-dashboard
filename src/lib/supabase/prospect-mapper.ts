@@ -1,5 +1,5 @@
 import type { Prospect } from "@/lib/types";
-import type { Database } from "./database.types";
+import type { Database, Json } from "./database.types";
 
 type Row = Database["public"]["Tables"]["prospects"]["Row"];
 type InsertRow = Database["public"]["Tables"]["prospects"]["Insert"];
@@ -13,14 +13,14 @@ export function rowToProspect(row: Row): Prospect {
     city: row.city ?? undefined,
     website: row.website ?? undefined,
     businessType: row.business_type ?? undefined,
-    extra: (row.extra as Record<string, string>) ?? {},
+    extra: (row.extra as unknown as Record<string, string>) ?? {},
     status: row.status as Prospect["status"],
     failureReason: (row.failure_reason as Prospect["failureReason"]) ?? undefined,
     nextCallDate: row.next_call_date ?? undefined,
     callAttempts: row.call_attempts,
     priority: row.priority,
     notes: row.notes,
-    history: (row.history as Prospect["history"]) ?? [],
+    history: (row.history as unknown as Prospect["history"]) ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -42,7 +42,7 @@ export function prospectToRow(p: Prospect): InsertRow {
     call_attempts: p.callAttempts,
     priority: p.priority,
     notes: p.notes,
-    history: p.history,
+    history: p.history as unknown as Json,
     created_at: p.createdAt,
     updated_at: p.updatedAt,
     // owner_id volontairement omis : rempli par le défaut auth.uid() côté DB.
