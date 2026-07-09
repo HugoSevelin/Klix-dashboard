@@ -27,6 +27,12 @@ function startOfWeek(d: Date): number {
   return startOfDay(c);
 }
 
+function daysAgo(d: Date, days: number): number {
+  const c = new Date(d);
+  c.setDate(c.getDate() - days);
+  return startOfDay(c);
+}
+
 function computePeriodStats(prospects: Prospect[], sinceMs: number) {
   const inPeriod = prospects.filter(
     (p) => (p.status === "success" || p.status === "failed") && new Date(p.updatedAt).getTime() >= sinceMs
@@ -44,6 +50,10 @@ export function StatsPanel({ prospects, dailyGoal, onGoalChange }: StatsPanelPro
 
   const today = useMemo(() => computePeriodStats(prospects, startOfDay(new Date())), [prospects]);
   const week = useMemo(() => computePeriodStats(prospects, startOfWeek(new Date())), [prospects]);
+  const last30Days = useMemo(
+    () => computePeriodStats(prospects, daysAgo(new Date(), 30)),
+    [prospects]
+  );
 
   const progress = Math.min(100, Math.round((today.total / Math.max(dailyGoal, 1)) * 100));
 
@@ -111,7 +121,7 @@ export function StatsPanel({ prospects, dailyGoal, onGoalChange }: StatsPanelPro
             <TrendingUp className="size-4 text-primary" />
             Taux de conversion
           </div>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Aujourd&apos;hui</p>
               <p className="text-2xl font-semibold tabular-nums">
@@ -128,6 +138,15 @@ export function StatsPanel({ prospects, dailyGoal, onGoalChange }: StatsPanelPro
               </p>
               <p className="text-xs text-muted-foreground">
                 {week.success} succès / {week.total} appel(s)
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">30 derniers jours</p>
+              <p className="text-2xl font-semibold tabular-nums">
+                {last30Days.total > 0 ? `${last30Days.rate}%` : "—"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {last30Days.success} succès / {last30Days.total} appel(s)
               </p>
             </div>
           </div>

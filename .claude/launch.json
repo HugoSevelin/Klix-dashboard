@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "C:\\Users\\hugos\\Documents\\GitHub\\Klix-dashboard\\.claude\\dev-with-node.cmd"],
       "port": 3000
     }
   ]

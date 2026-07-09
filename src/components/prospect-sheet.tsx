@@ -8,11 +8,13 @@ import {
   History,
   MapPin,
   Phone,
+  Star,
   StickyNote,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getProspectWebsite } from "@/lib/utils";
+import { cn, getProspectWebsite } from "@/lib/utils";
+import { NOTE_SNIPPETS } from "@/lib/note-snippets";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,10 +36,11 @@ interface ProspectSheetProps {
   prospect: Prospect | null;
   onClose: () => void;
   onStatusChange: (id: string, status: ProspectStatus, failureReason?: FailureReason) => void;
+  onPriorityChange: (id: string, priority: boolean) => void;
   onNotesChange: (id: string, notes: string) => void;
   onNotesSaved: (id: string) => void;
   onNextCallDateChange: (id: string, date: string | undefined) => void;
-  onDelete: (id: string) => void;
+  onDelete: (prospect: Prospect) => void;
 }
 
 function formatDate(iso: string): string {
@@ -59,6 +62,7 @@ export function ProspectSheet({
   prospect,
   onClose,
   onStatusChange,
+  onPriorityChange,
   onNotesChange,
   onNotesSaved,
   onNextCallDateChange,
@@ -109,6 +113,14 @@ export function ProspectSheet({
               status={prospect.status}
               onChange={(s, reason) => onStatusChange(prospect.id, s, reason)}
             />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onPriorityChange(prospect.id, !prospect.priority)}
+              title={prospect.priority ? "Retirer des prioritaires" : "Marquer comme prioritaire"}
+            >
+              <Star className={cn("size-4", prospect.priority && "fill-amber-400 text-amber-400")} />
+            </Button>
           </div>
           <p className="pt-1 text-xs text-muted-foreground">
             Raccourcis : <kbd className="rounded border px-1">1</kbd> À faire ·{" "}
@@ -208,6 +220,21 @@ export function ProspectSheet({
                 <StickyNote className="size-4 text-muted-foreground" />
                 Notes d&apos;appel
               </Label>
+              <div className="flex flex-wrap gap-1.5">
+                {NOTE_SNIPPETS.map((snippet) => (
+                  <Button
+                    key={snippet}
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    onClick={() =>
+                      setDraftNotes((prev) => (prev.trim() ? `${prev}\n${snippet}` : snippet))
+                    }
+                  >
+                    {snippet}
+                  </Button>
+                ))}
+              </div>
               <Textarea
                 value={draftNotes}
                 onChange={(e) => setDraftNotes(e.target.value)}
@@ -267,9 +294,8 @@ export function ProspectSheet({
               className="text-destructive"
               title="Supprimer ce prospect"
               onClick={() => {
-                onDelete(prospect.id);
+                onDelete(prospect);
                 onClose();
-                toast.success("Prospect supprimé.");
               }}
             >
               <Trash2 className="size-4" />

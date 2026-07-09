@@ -23,14 +23,16 @@ import {
 } from "@/components/ui/select";
 import { makeHistoryEntry } from "@/lib/store";
 import type { Prospect } from "@/lib/types";
+import { findDuplicateProspect } from "@/lib/utils";
 
-type MappableField = "company" | "phone" | "address" | "city" | "website";
+type MappableField = "company" | "phone" | "address" | "city" | "businessType" | "website";
 
 const FIELD_LABELS: Record<MappableField, string> = {
   company: "Nom de l'entreprise",
   phone: "Téléphone",
   address: "Adresse",
   city: "Ville",
+  businessType: "Type d'entreprise",
   website: "Site internet",
 };
 
@@ -42,6 +44,7 @@ const FIELD_KEYWORDS: Record<MappableField, string[]> = {
   phone: ["telephone", "tel", "phone", "mobile", "portable", "numero"],
   address: ["adresse", "address", "localisation", "location"],
   city: ["ville", "city", "commune", "localite"],
+  businessType: ["secteur", "type", "categorie", "activite", "domaine", "industry", "sector"],
   website: ["site", "website", "url", "site web", "site internet"],
 };
 
@@ -54,9 +57,9 @@ function normalize(s: string): string {
 }
 
 function autoMap(headers: string[]): Record<MappableField, string> {
-  const result = { company: "", phone: "", address: "", city: "", website: "" };
+  const result = { company: "", phone: "", address: "", city: "", businessType: "", website: "" };
   const taken = new Set<string>();
-  for (const field of ["phone", "address", "city", "website", "company"] as MappableField[]) {
+  for (const field of ["phone", "address", "city", "website", "businessType", "company"] as MappableField[]) {
     for (const keyword of FIELD_KEYWORDS[field]) {
       const match = headers.find(
         (h) => !taken.has(h) && normalize(h).includes(keyword)
@@ -72,10 +75,11 @@ function autoMap(headers: string[]): Record<MappableField, string> {
 }
 
 interface CsvImportProps {
+  existingProspects: Prospect[];
   onImport: (prospects: Prospect[]) => void;
 }
 
-export function CsvImport({ onImport }: CsvImportProps) {
+export function CsvImport({ existingProspects, onImport }: CsvImportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -86,6 +90,7 @@ export function CsvImport({ onImport }: CsvImportProps) {
     phone: "",
     address: "",
     city: "",
+    businessType: "",
     website: "",
   });
 
@@ -116,7 +121,7 @@ export function CsvImport({ onImport }: CsvImportProps) {
     }
     const mapped = new Set(Object.values(mapping).filter(Boolean));
     const now = new Date().toISOString();
-    const prospects: Prospect[] = rows
+    const parsed: Prospect[] = rows
       .map((row) => {
         const extra: Record<string, string> = {};
         for (const h of headers) {
@@ -128,10 +133,12 @@ export function CsvImport({ onImport }: CsvImportProps) {
           phone: mapping.phone ? (row[mapping.phone] ?? "").trim() : "",
           address: mapping.address ? (row[mapping.address] ?? "").trim() : "",
           city: mapping.city ? (row[mapping.city] ?? "").trim() : "",
+          businessType: mapping.businessType ? (row[mapping.businessType] ?? "").trim() : "",
           website: mapping.website ? (row[mapping.website] ?? "").trim() : "",
           extra,
           status: "todo" as const,
           callAttempts: 0,
+          priority: false,
           notes: "",
           history: [makeHistoryEntry(`Importé depuis ${fileName}`)],
           createdAt: now,
@@ -139,12 +146,36 @@ export function CsvImport({ onImport }: CsvImportProps) {
         };
       })
       .filter((p) => p.company);
-    if (prospects.length === 0) {
+    if (parsed.length === 0) {
       toast.error("Aucune ligne valide trouvée (nom d'entreprise manquant).");
       return;
     }
+
+    // Écarte les doublons : contre les prospects déjà en base, puis entre
+    // les lignes du fichier lui-même.
+    const prospects: Prospect[] = [];
+    let duplicateCount = 0;
+    for (const p of parsed) {
+      const isDuplicate =
+        findDuplicateProspect(existingProspects, p.company, p.phone) ||
+        findDuplicateProspect(prospects, p.company, p.phone);
+      if (isDuplicate) {
+        duplicateCount++;
+        continue;
+      }
+      prospects.push(p);
+    }
+
+    if (prospects.length === 0) {
+      toast.error("Toutes les lignes correspondent à des prospects déjà existants.");
+      return;
+    }
     onImport(prospects);
-    toast.success(`${prospects.length} prospect(s) importé(s).`);
+    toast.success(
+      duplicateCount > 0
+        ? `${prospects.length} prospect(s) importé(s), ${duplicateCount} doublon(s) ignoré(s).`
+        : `${prospects.length} prospect(s) importé(s).`
+    );
     setOpen(false);
     setRows([]);
     setHeaders([]);

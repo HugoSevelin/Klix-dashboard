@@ -28,6 +28,7 @@ export interface Prospect {
   address: string;
   city?: string;
   website?: string;
+  businessType?: string;
   /** Colonnes CSV supplémentaires non mappées : { "Nom de colonne": "valeur" } */
   extra: Record<string, string>;
   status: ProspectStatus;
@@ -37,6 +38,8 @@ export interface Prospect {
   nextCallDate?: string;
   /** Nombre de fois où le prospect a été marqué succès ou échec */
   callAttempts: number;
+  /** Prospect à rappeler en priorité, remonte en tête des listes/files */
+  priority: boolean;
   notes: string;
   history: HistoryEntry[];
   createdAt: string; // ISO

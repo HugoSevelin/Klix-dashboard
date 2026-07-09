@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge, StatusButtons } from "@/components/status-controls";
+import { NOTE_SNIPPETS } from "@/lib/note-snippets";
 import type { FailureReason, Prospect, ProspectStatus } from "@/lib/types";
 import { getProspectWebsite } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ export function DailyCallView({
       return new Date(p.nextCallDate).setHours(0, 0, 0, 0) <= today;
     });
     candidates.sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority ? -1 : 1;
       const aOverdue = a.nextCallDate ? new Date(a.nextCallDate).setHours(0, 0, 0, 0) < today : false;
       const bOverdue = b.nextCallDate ? new Date(b.nextCallDate).setHours(0, 0, 0, 0) < today : false;
       if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
@@ -155,6 +157,21 @@ export function DailyCallView({
                 <StickyNote className="size-4" />
                 Notes
               </p>
+              <div className="flex flex-wrap gap-1.5">
+                {NOTE_SNIPPETS.map((snippet) => (
+                  <Button
+                    key={snippet}
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    onClick={() =>
+                      setDraftNotes((prev) => (prev.trim() ? `${prev}\n${snippet}` : snippet))
+                    }
+                  >
+                    {snippet}
+                  </Button>
+                ))}
+              </div>
               <Textarea
                 value={draftNotes}
                 onChange={(e) => setDraftNotes(e.target.value)}
