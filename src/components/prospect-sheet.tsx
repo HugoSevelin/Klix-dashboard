@@ -8,6 +8,7 @@ import {
   History,
   MapPin,
   Phone,
+  Search,
   Star,
   StickyNote,
   Trash2,
@@ -100,10 +101,47 @@ export function ProspectSheet({
     <Sheet open onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-lg">
         <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle className="flex items-center gap-2 text-lg">
-            <Building2 className="size-5 shrink-0" />
-            {prospect.company}
-          </SheetTitle>
+          <div className="flex flex-col gap-1.5">
+            <SheetTitle className="flex items-center gap-2 text-lg">
+              <Building2 className="size-5 shrink-0" />
+              {prospect.company}
+            </SheetTitle>
+            <div className="flex flex-wrap items-center gap-1.5 pl-7">
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(prospect.company + " " + (prospect.city || ""))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-5 items-center gap-1 rounded bg-muted px-1.5 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                title="Rechercher sur Google"
+              >
+                <Search className="size-2.5" /> Google
+              </a>
+              <a
+                href={`https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(prospect.company)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-5 items-center gap-1 rounded bg-muted px-1.5 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                title="Rechercher sur LinkedIn"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-2.5">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect width="4" height="12" x="2" y="9" />
+                  <circle cx="4" cy="4" r="2" />
+                </svg> LinkedIn
+              </a>
+              {prospect.address && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(prospect.company + " " + prospect.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-5 items-center gap-1 rounded bg-muted px-1.5 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                  title="Rechercher sur Google Maps"
+                >
+                  <MapPin className="size-2.5" /> Maps
+                </a>
+              )}
+            </div>
+          </div>
           <SheetDescription className="sr-only">
             Fiche détaillée du prospect
           </SheetDescription>

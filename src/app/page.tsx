@@ -188,6 +188,7 @@ export default function DashboardPage() {
         onStatusChange={setStatus}
         onNotesChange={setNotes}
         onNotesSaved={logNoteSaved}
+        onNextCallDateChange={setNextCallDate}
       />
 
       <Dialog open={confirmClear} onOpenChange={setConfirmClear}>

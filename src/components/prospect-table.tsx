@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlarmClock, Building2, Globe, Phone, Search, Star, Trash2, X } from "lucide-react";
+import { AlarmClock, Building2, Globe, MapPin, Phone, Search, Star, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -352,18 +352,44 @@ export function ProspectTable({
                       <div>
                         <p className="font-medium">{p.company}</p>
                         {city && <p className="text-xs text-muted-foreground">{city}</p>}
-                        {websiteUrl && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          {websiteUrl && (
+                            <a
+                              href={websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex w-fit items-center gap-1 text-xs text-primary hover:underline mr-1"
+                            >
+                              <Globe className="size-3 text-muted-foreground" />
+                              {websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                            </a>
+                          )}
                           <a
-                            href={websiteUrl}
+                            href={`https://www.google.com/search?q=${encodeURIComponent(p.company + " " + (city || ""))}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex w-fit items-center gap-1 text-xs text-primary hover:underline"
+                            className="inline-flex h-4 items-center gap-0.5 rounded bg-muted px-1 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                            title="Rechercher sur Google"
                           >
-                            <Globe className="size-3 text-muted-foreground" />
-                            {websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                            <Search className="size-2" /> Google
                           </a>
-                        )}
+                          <a
+                            href={`https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(p.company)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex h-4 items-center gap-0.5 rounded bg-muted px-1 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                            title="Rechercher sur LinkedIn"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-2">
+                              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                              <rect width="4" height="12" x="2" y="9" />
+                              <circle cx="4" cy="4" r="2" />
+                            </svg> LinkedIn
+                          </a>
+                        </div>
                       </div>
                     </div>
                     <StatusBadge status={p.status} failureReason={p.failureReason} />
@@ -468,18 +494,44 @@ export function ProspectTable({
                         </button>
                         <div className="flex flex-col gap-0.5">
                           <span>{p.company}</span>
-                          {websiteUrl && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {websiteUrl && (
+                              <a
+                                href={websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex w-fit items-center gap-1 text-xs font-normal text-primary hover:underline mr-0.5"
+                              >
+                                <Globe className="size-3 text-muted-foreground" />
+                                {websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                              </a>
+                            )}
                             <a
-                              href={websiteUrl}
+                              href={`https://www.google.com/search?q=${encodeURIComponent(p.company + " " + (getProspectCity(p) || ""))}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex w-fit items-center gap-1 text-xs font-normal text-primary hover:underline"
+                              className="inline-flex h-4 items-center gap-0.5 rounded bg-muted px-1 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                              title="Rechercher sur Google"
                             >
-                              <Globe className="size-3 text-muted-foreground" />
-                              {websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}
+                              <Search className="size-2" /> Google
                             </a>
-                          )}
+                            <a
+                              href={`https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(p.company)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex h-4 items-center gap-0.5 rounded bg-muted px-1 text-[10px] text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                              title="Rechercher sur LinkedIn"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-2">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                <rect width="4" height="12" x="2" y="9" />
+                                <circle cx="4" cy="4" r="2" />
+                              </svg> LinkedIn
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
